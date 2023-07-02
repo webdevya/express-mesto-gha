@@ -28,14 +28,14 @@ module.exports.createUser = (req, res, next) => {
 module.exports.updateUser = (req, res, next) => {
   execRequest(req, res, next, (x) => {
     const { name, about } = x.body;
-    return User.findByIdAndUpdate(x.user._id, { name, about }, { new: true });
+    return User.findByIdAndUpdate(x.user._id, { name, about }, { new: true, runValidators: true });
   }, viewModelUser, notFoundText, validationErrorText);
 };
 
 module.exports.updateUserAvatar = (req, res, next) => {
   execRequest(req, res, next, (x) => {
     const { avatar } = x.body;
-    return User.findByIdAndUpdate(x.user._id, { avatar }, { new: true });
+    return User.findByIdAndUpdate(x.user._id, { avatar }, { new: true, runValidators: true });
   }, viewModelUser, notFoundText, validationErrorText);
 };
 
