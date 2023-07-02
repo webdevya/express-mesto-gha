@@ -25,8 +25,12 @@ app.use((req, res, next) => {
 
 app.use('/users', require('./routes/user'));
 app.use('/cards', require('./routes/card'));
-
+// app.use('*', require('./routes/notFound'));
 app.get('*', (req, res, next) => next(new NotFoundError('Запрашиваемая страница не найдена')));
+app.put('*', (req, res, next) => next(new NotFoundError('Запрашиваемая страница не найдена')));
+app.post('*', (req, res, next) => next(new NotFoundError('Запрашиваемая страница не найдена')));
+app.patch('*', (req, res, next) => next(new NotFoundError('Запрашиваемая страница не найдена')));
+app.delete('*', (req, res, next) => next(new NotFoundError('Запрашиваемая страница не найдена')));
 
 app.use(errorLogger);
 app.use(errorResponder);
