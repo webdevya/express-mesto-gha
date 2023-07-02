@@ -1,14 +1,14 @@
 const router = require('express').Router();
-const {
-  notFoundGet, notFoundPut, notFoundPost, notFoundPatch, notFoundDelete,
-} = require('../controllers/notFound');
+const { notFoundFunc } = require('../controllers/notFound');
 
-router.get('/', notFoundGet);
+router.get('/', notFoundFunc);
 
-router.put('/', notFoundPut);
+router.put('/', notFoundFunc);
 
-router.post('/', notFoundPost);
+router.post('/', notFoundFunc);
 
-router.patch('/', notFoundPatch);
+router.patch('/', notFoundFunc);
 
-router.delete('/', notFoundDelete);
+router.delete('/', notFoundFunc);
+
+module.exports = router;
