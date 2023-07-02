@@ -18,7 +18,7 @@ module.exports.execRequest = (
       return res.send(viewModelFunc(data));
     })
     .catch((err) => {
-      if (err instanceof mongoose.Error.ValidationError) {
+      if (err instanceof mongoose.Error) {
         next(new ValidationError(validationErrorText, err.message));
       } else next(err);
     });
