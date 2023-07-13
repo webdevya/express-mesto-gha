@@ -12,7 +12,7 @@ const userSchema = new mongoose.Schema({
     type: String,
     required: true,
     validate: {
-      validator: (e) => Promise.resolve(() => validator.isURL(e, { protocols: ['http', 'https'], require_tld: true, require_protocol: true })),
+      validator: (e) => validator.isURL(e, { protocols: ['http', 'https'], require_tld: true, require_protocol: true }),
       message: (props) => `${props.value} не является ссылкой!`,
     },
   },

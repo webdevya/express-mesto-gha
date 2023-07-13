@@ -8,7 +8,7 @@ const notFoundText = 'Пользователь не найден';
 const validationErrorText = 'Ошибка вносимых данных для пользователя';
 const conflictErrorText = 'Указанные данные уже существуют';
 
-const { JWT_SECRET, HASH_SALT_ROUND = 10 } = process.env;
+const { JWT_SECRET } = process.env;
 
 const viewModelUser = (data) => {
   const res = {
@@ -29,7 +29,7 @@ module.exports.createUser = (req, res, next) => {
     const {
       name, about, avatar, email, password,
     } = x.body;
-    return bcrypt.hash(password, HASH_SALT_ROUND)
+    return bcrypt.hash(password, 10)
       .then((hash) => User.create({
         name, about, avatar, email, password: hash,
       }));
