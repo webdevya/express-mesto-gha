@@ -3,6 +3,7 @@ const mongoose = require('mongoose');
 const bodyParser = require('body-parser');
 const dotenv = require('dotenv');
 const helmet = require('helmet');
+const { errors } = require('celebrate');
 const { errorLogger, errorResponder } = require('./middleware/errorMiddleware');
 // const { createUser, login } = require('./controllers/user');
 const auth = require('./middleware/auth');
@@ -22,12 +23,16 @@ mongoose.connect(DB_URL, {
 });
 
 app.use('/', require('./routes/auth'));
+
+app.use(errors());
 // app.post('/signin', login);
 // app.post('/signup', createUser);
 app.use(auth);
 
 app.use('/users', require('./routes/user'));
 app.use('/cards', require('./routes/card'));
+
+app.use(errors());
 app.use('*', require('./routes/notFound'));
 
 app.use(errorLogger);
