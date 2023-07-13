@@ -4,7 +4,7 @@ const bodyParser = require('body-parser');
 const dotenv = require('dotenv');
 const helmet = require('helmet');
 const { errorLogger, errorResponder } = require('./middleware/errorMiddleware');
-const { createUser, login } = require('./controllers/user');
+// const { createUser, login } = require('./controllers/user');
 const auth = require('./middleware/auth');
 
 dotenv.config();
@@ -21,8 +21,9 @@ mongoose.connect(DB_URL, {
   useNewUrlParser: true,
 });
 
-app.post('/signin', login);
-app.post('/signup', createUser);
+app.use('/', require('./routes/auth'));
+// app.post('/signin', login);
+// app.post('/signup', createUser);
 app.use(auth);
 
 app.use('/users', require('./routes/user'));
