@@ -4,10 +4,7 @@ const {
   deleteCard, getAllCards, createCard, likeCard, dislikeCard,
 } = require('../controllers/card');
 const { urlRegex } = require('../validation/regex');
-
-const authRule = () => Joi.object().keys({
-  autorization: Joi.string().replace('Bearer ', '').token(),
-});
+const { authRule } = require('../validation/rules');
 
 router.get('/', celebrate({
   headers: authRule,
@@ -15,14 +12,14 @@ router.get('/', celebrate({
 
 router.delete('/:cardId', celebrate({
   params: Joi.object().keys({
-    userId: Joi.string().required().hex().length(24),
+    cardId: Joi.string().required().hex().length(24),
   }),
   headers: authRule,
 }), deleteCard);
 
 router.post('/', celebrate({
   body: Joi.object().keys({
-    name: Joi.string().required(),
+    name: Joi.string().required().min(2).max(30),
     link: Joi.string().required().pattern(urlRegex),
   }),
   headers: authRule,
@@ -30,14 +27,14 @@ router.post('/', celebrate({
 
 router.put('/:cardId/likes', celebrate({
   params: Joi.object().keys({
-    userId: Joi.string().required().hex().length(24),
+    cardId: Joi.string().required().hex().length(24),
   }),
   headers: authRule,
 }), likeCard);
 
 router.delete('/:cardId/likes', celebrate({
   params: Joi.object().keys({
-    userId: Joi.string().required().hex().length(24),
+    cardId: Joi.string().required().hex().length(24),
   }),
   headers: authRule,
 }), dislikeCard);

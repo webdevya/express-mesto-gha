@@ -4,6 +4,7 @@ const {
   getUser, getCurrentUser, getAllUsers, updateUser, updateUserAvatar,
 } = require('../controllers/user');
 const { urlRegex } = require('../validation/regex');
+const { authRule } = require('../validation/rules');
 
 router.get('/', getAllUsers);
 
@@ -17,7 +18,13 @@ router.get('/:userId', celebrate({
 
 // router.post('/', createUser);
 
-router.patch('/me', updateUser);
+router.patch('/me', celebrate({
+  body: Joi.object().keys({
+    name: Joi.string().min(2).max(30),
+    about: Joi.string().min(2).max(30),
+  }),
+  headers: authRule,
+}), updateUser);
 
 router.patch('/me/avatar', celebrate({
   body: Joi.object().keys({
