@@ -2,6 +2,7 @@ const mongoose = require('mongoose');
 
 const NotFoundError = require('../errors/NotFoundError');
 const ValidationError = require('../errors/ValidationError');
+const ConflictError = require('../errors/ConflictError');
 
 module.exports.execRequest = (
   req,
@@ -11,6 +12,7 @@ module.exports.execRequest = (
   viewModelFunc,
   notFoundText,
   validationErrorText,
+  ConflictErrorText = 'Конфликт данных',
 ) => {
   promiseFunc(req)
     .then((data) => {
@@ -18,7 +20,9 @@ module.exports.execRequest = (
       return res.send(viewModelFunc(data));
     })
     .catch((err) => {
-      if (err instanceof mongoose.Error) {
+      if (err.code === 11000) {
+        next(new ConflictError(ConflictErrorText, err.message));
+      } else if (err instanceof mongoose.Error) {
         next(new ValidationError(validationErrorText, err.message));
       } else next(err);
     });

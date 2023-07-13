@@ -1,22 +1,65 @@
 const mongoose = require('mongoose');
+const validator = require('validator');
+const bcrypt = require('bcryptjs');
+const AuthError = require('../errors/AuthError');
 
 const userSchema = new mongoose.Schema({
-  name: { // у пользователя есть только имя
+  name: {
     type: String,
     minlength: 2,
     maxlength: 30,
-    required: true,
+    required: false,
+    default: 'Жак-Ив Кусто',
   },
-  about: { // у пользователя есть только имя
+  about: {
     type: String,
     minlength: 2,
     maxlength: 30,
-    required: true,
+    required: false,
+    default: 'Исследователь',
   },
-  avatar: { // у пользователя есть только имя
+  avatar: {
+    type: String,
+    required: false,
+    default: 'https://pictures.s3.yandex.net/resources/jacques-cousteau_1604399756.png',
+    validate: {
+      validator: (e) => Promise.resolve(() => validator.isURL(e, { protocols: ['http', 'https'], require_tld: true, require_protocol: true })),
+      message: (props) => `${props.value} не является ссылкой!`,
+    },
+  },
+  email: {
     type: String,
     required: true,
+    unique: true,
+    validate: {
+      validator: (e) => Promise.resolve(validator.isEmail(e)),
+      message: (props) => `${props.value} не является почтой!`,
+    },
+  },
+  password: {
+    type: String,
+    required: true,
+    select: false,
   },
 });
+
+// eslint-disable-next-line func-names
+userSchema.statics.findUserByCredentials = function (email, password) {
+  return this.findOne({ email }).select('+password')
+    .then((user) => {
+      if (!user) {
+        return Promise.reject(new AuthError('Неправильные почта или пароль'));
+      }
+
+      return bcrypt.compare(password, user.password)
+        .then((matched) => {
+          if (!matched) {
+            return Promise.reject(new AuthError('Неправильные почта или пароль'));
+          }
+
+          return user;
+        });
+    });
+};
 
 module.exports = mongoose.model('user', userSchema);
