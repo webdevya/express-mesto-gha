@@ -1,7 +1,9 @@
 const jwt = require('jsonwebtoken');
+const dotenv = require('dotenv');
 const AuthError = require('../errors/AuthError');
 const { errorHandler } = require('./errorMiddleware');
 
+dotenv.config();
 const { JWT_SECRET } = process.env;
 
 module.exports = (req, res, next) => {
@@ -12,7 +14,7 @@ module.exports = (req, res, next) => {
     return;
   }
 
-  if (!JWT_SECRET) errorHandler(Error('JWT_SECRET not found in environment'));
+  if (!JWT_SECRET) errorHandler(Error('JWT_SECRET not found in environment (auth.js)'));
 
   const token = authorization.replace('Bearer ', '');
   let payload;
