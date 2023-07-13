@@ -1,5 +1,6 @@
 const router = require('express').Router();
 const { celebrate, Joi } = require('celebrate');
+const { urlRegex } = require('../validation/regex');
 
 const { createUser, login } = require('../controllers/user');
 
@@ -9,7 +10,7 @@ router.post('/signup', celebrate({
     password: Joi.string().required().min(1),
     name: Joi.string().min(2).max(30),
     about: Joi.string().min(2).max(30),
-    avatar: Joi.string().uri(),
+    avatar: Joi.string().pattern(urlRegex),
   }),
 }), createUser);
 

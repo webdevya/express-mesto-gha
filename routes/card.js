@@ -3,6 +3,7 @@ const { celebrate, Joi } = require('celebrate');
 const {
   deleteCard, getAllCards, createCard, likeCard, dislikeCard,
 } = require('../controllers/card');
+const { urlRegex } = require('../validation/regex');
 
 const authRule = () => Joi.object().keys({
   autorization: Joi.string().replace('Bearer ', '').token(),
@@ -22,7 +23,7 @@ router.delete('/:cardId', celebrate({
 router.post('/', celebrate({
   body: Joi.object().keys({
     name: Joi.string().required(),
-    link: Joi.string().required().uri(),
+    link: Joi.string().required().pattern(urlRegex),
   }),
   headers: authRule,
 }), createCard);
