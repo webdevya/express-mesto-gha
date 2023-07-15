@@ -1,16 +1,12 @@
 const express = require('express');
 const mongoose = require('mongoose');
 const bodyParser = require('body-parser');
-const dotenv = require('dotenv');
 const helmet = require('helmet');
 const { errors } = require('celebrate');
 const { errorLogger, errorResponder } = require('./middleware/errorMiddleware');
-// const { createUser, login } = require('./controllers/user');
 const auth = require('./middleware/auth');
 
-dotenv.config();
-// .env file temporary excluded from .gitignore for testing reason
-const { PORT = 3000, DB_URL } = process.env;
+const { PORT, DB_URL } = require('./config');
 
 const app = express();
 
@@ -25,8 +21,6 @@ mongoose.connect(DB_URL, {
 app.use('/', require('./routes/auth'));
 
 app.use(errors());
-// app.post('/signin', login);
-// app.post('/signup', createUser);
 app.use(auth);
 
 app.use('/users', require('./routes/user'));

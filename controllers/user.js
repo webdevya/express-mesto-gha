@@ -1,16 +1,14 @@
 const jwt = require('jsonwebtoken');
 const bcrypt = require('bcryptjs');
-const dotenv = require('dotenv');
 const User = require('../models/user');
 
 const { execRequest } = require('./controllerBase');
 
+const { JWT_SECRET } = require('../config');
+
 const notFoundText = 'Пользователь не найден';
 const validationErrorText = 'Ошибка вносимых данных для пользователя';
 const conflictErrorText = 'Указанные данные уже существуют';
-
-dotenv.config();
-const { JWT_SECRET } = process.env;
 
 const viewModelUser = (data) => {
   const res = {
