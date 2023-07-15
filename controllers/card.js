@@ -1,3 +1,5 @@
+const ForbiddenError = require('../errors/ForbiddenError');
+const NotFoundError = require('../errors/NotFoundError');
 const Card = require('../models/card');
 const { execRequest } = require('./controllerBase');
 const { createUserViewModel } = require('./user');
@@ -34,8 +36,12 @@ module.exports.deleteCard = (req, res, next) => {
     req,
     res,
     next,
-    (x) => Card.findOneAndRemove({ _id: x.params.cardId, owner: req.user._id }),
-    // findByIdAndRemove(x.params.cardId),
+    (x) => Card.findById(x.params.cardId, 'owner').then((crd) => {
+      if (!crd) return Promise.reject(new NotFoundError(notFoundText));
+      if (crd.owner._id !== req.user._id) return Promise.reject(new ForbiddenError());
+      return Card.findByIdAndRemove(x.params.cardId);
+    }),
+    // Card.findOneAndRemove({ _id: x.params.cardId, owner: req.user._id }) ,
     viewModelCard,
     notFoundText,
     validationErrorText,
