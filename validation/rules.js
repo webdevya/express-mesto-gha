@@ -12,31 +12,24 @@ const avatarObj = { avatar: urlRule };
 const userTextsObj = { name: stringRuleRequired, about: stringRuleRequired };
 const loginObj = { email: emailRule, password: pwdRule };
 const cardObj = { name: stringRule, link: urlRule };
-const userObj = {
-  email: emailRule,
-  password: pwdRule,
-  name: stringRule,
-  about: stringRule,
-  avatar: urlRule,
-};
 
-const authRule = () => Joi.object().keys({
+const authRule = Joi.object().keys({
   autorization: Joi.string().replace('Bearer ', '').token(),
 });
 
-const userRule = () => Joi.object().keys({ userObj });
+const userRule = Joi.object().keys({ ...loginObj, ...userTextsObj, ...avatarObj });
 
-const loginRule = () => Joi.object().keys({ loginObj });
+const loginRule = Joi.object().keys(loginObj);
 
-const userTextsRule = () => Joi.object().keys({ userTextsObj });
+const userTextsRule = Joi.object().keys(userTextsObj);
 
-const avatarRule = () => Joi.object().keys({ avatarObj });
+const avatarRule = Joi.object().keys(avatarObj);
 
-const userIdRule = () => Joi.object().keys({ userId: idRule });
+const userIdRule = Joi.object().keys({ userId: idRule });
 
-const cardIdRule = () => Joi.object().keys({ cardId: idRule });
+const cardIdRule = Joi.object().keys({ cardId: idRule });
 
-const cardRule = () => Joi.object().keys({ cardObj });
+const cardRule = Joi.object().keys(cardObj);
 
 module.exports = {
   authRule, userRule, loginRule, cardIdRule, cardRule, userIdRule, userTextsRule, avatarRule,
