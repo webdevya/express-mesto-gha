@@ -18,6 +18,8 @@ mongoose.connect(DB_URL, {
   useNewUrlParser: true,
 });
 
+// app.use('/', require('./routes/index'));
+
 app.use('/', require('./routes/auth'));
 
 app.use(errors());
@@ -25,10 +27,9 @@ app.use(auth);
 
 app.use('/users', require('./routes/user'));
 app.use('/cards', require('./routes/card'));
-
-app.use(errors());
 app.use('*', require('./routes/notFound'));
 
+app.use(errors());
 app.use(errorLogger);
 app.use(errorResponder);
 

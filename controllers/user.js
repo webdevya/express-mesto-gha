@@ -1,8 +1,10 @@
+const mongoose = require('mongoose');
 const jwt = require('jsonwebtoken');
 const bcrypt = require('bcryptjs');
 const User = require('../models/user');
-
-const { execRequest } = require('./controllerBase');
+const NotFoundError = require('../errors/NotFoundError');
+const ValidationError = require('../errors/ValidationError');
+const ConflictError = require('../errors/ConflictError');
 
 const { JWT_SECRET } = require('../config');
 
@@ -25,72 +27,78 @@ const ViewModelUserArray = (data) => {
 };
 
 module.exports.createUser = (req, res, next) => {
-  execRequest(req, res, next, (x) => {
-    const {
-      name, about, avatar, email, password,
-    } = x.body;
-    return bcrypt.hash(password, 10)
-      .then((hash) => User.create({
-        name, about, avatar, email, password: hash,
-      }));
-  }, viewModelUser, notFoundText, validationErrorText, conflictErrorText);
+  const {
+    name, about, avatar, email, password,
+  } = req.body;
+  bcrypt.hash(password, 10)
+    .then((hash) => User.create({
+      name, about, avatar, email, password: hash,
+    })).then((data) => res.send(viewModelUser(data)))
+    .catch((err) => {
+      if (err.code === 11000) {
+        next(new ConflictError(conflictErrorText, err.message));
+      } else if (err instanceof mongoose.Error) {
+        next(new ValidationError(validationErrorText, err.message));
+      } else next(err);
+    });
 };
 
 module.exports.updateUser = (req, res, next) => {
-  execRequest(req, res, next, (x) => {
-    const { name, about } = x.body;
-    return User.findByIdAndUpdate(x.user._id, { name, about }, { new: true, runValidators: true });
-  }, viewModelUser, notFoundText, validationErrorText);
+  const { name, about } = req.body;
+  User.findByIdAndUpdate(req.user._id, { name, about }, { new: true, runValidators: true })
+    .then((data) => {
+      if (data === null) next(new NotFoundError(notFoundText));
+      res.send(viewModelUser(data));
+    })
+    .catch((err) => {
+      if (err instanceof mongoose.Error) {
+        next(new ValidationError(validationErrorText, err.message));
+      } else next(err);
+    });
 };
 
 module.exports.updateUserAvatar = (req, res, next) => {
-  execRequest(req, res, next, (x) => {
-    const { avatar } = x.body;
-    return User.findByIdAndUpdate(x.user._id, { avatar }, { new: true, runValidators: true });
-  }, viewModelUser, notFoundText, validationErrorText);
+  const { avatar } = req.body;
+  User.findByIdAndUpdate(req.user._id, { avatar }, { new: true, runValidators: true })
+    .then((data) => {
+      if (data === null) next(new NotFoundError(notFoundText));
+      res.send(viewModelUser(data));
+    })
+    .catch((err) => {
+      if (err instanceof mongoose.Error) {
+        next(new ValidationError(validationErrorText, err.message));
+      } else next(err);
+    });
 };
 
 module.exports.getCurrentUser = (req, res, next) => {
-  execRequest(
-    req,
-    res,
-    next,
-    () => User.findById(req.user._id),
-    viewModelUser,
-    notFoundText,
-    validationErrorText,
-  );
+  User.findById(req.user._id)
+    .then((data) => {
+      if (data === null) next(new NotFoundError(notFoundText));
+      res.send(viewModelUser(data));
+    })
+    .catch(next);
 };
 
 module.exports.getUser = (req, res, next) => {
-  execRequest(
-    req,
-    res,
-    next,
-    (x) => User.findById(x.params.userId),
-    viewModelUser,
-    notFoundText,
-    validationErrorText,
-  );
+  User.findById(req.params.userId)
+    .then((data) => {
+      if (data === null) next(new NotFoundError(notFoundText));
+      res.send(viewModelUser(data));
+    })
+    .catch(next);
 };
 
 module.exports.getAllUsers = (req, res, next) => {
-  execRequest(
-    req,
-    res,
-    next,
-    () => User.find({}),
-    ViewModelUserArray,
-    notFoundText,
-    validationErrorText,
-  );
+  User.find({})
+    .then((data) => res.send(ViewModelUserArray(data)))
+    .catch(next);
 };
 
 module.exports.login = (req, res, next) => {
   const { email, password } = req.body;
   if (!JWT_SECRET) throw new Error('JWT_SECRET not found in environment');
-
-  return User.findUserByCredentials(email, password)
+  User.findUserByCredentials(email, password)
     .then((user) => {
       const token = jwt.sign({ _id: user._id }, JWT_SECRET, { expiresIn: '7d' });
       res.send({ token });
