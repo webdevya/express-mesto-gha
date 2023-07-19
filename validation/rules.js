@@ -14,7 +14,7 @@ const avatarObj = { avatar: urlRule };
 const userTextsRequiredObj = { name: stringRuleRequired, about: stringRuleRequired };
 const userTextsObj = { name: stringRule, about: stringRule };
 const loginObj = { email: emailRule, password: pwdRule };
-const cardObj = { name: stringRule, link: urlRule };
+const cardObj = { name: stringRuleRequired, link: urlRuleRequired };
 
 const authRule = Joi.object().keys({
   authorization: Joi.string().replace('Bearer ', '').pattern(jwtRegex),
