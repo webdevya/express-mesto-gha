@@ -15,7 +15,6 @@ router.get('/:userId', celebrate({ params: userIdRule }), getUser);
 
 router.patch('/me', celebrate({
   body: userTextsRule,
-  headers: authRule,
 }), updateUser);
 
 router.patch('/me/avatar', celebrate({

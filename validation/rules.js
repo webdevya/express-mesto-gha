@@ -17,7 +17,7 @@ const loginObj = { email: emailRule, password: pwdRule };
 const cardObj = { name: stringRule, link: urlRule };
 
 const authRule = Joi.object().keys({
-  autorization: Joi.string().replace('Bearer ', '').token(),
+  authorization: Joi.string().replace('Bearer ', '').token(),
 });
 
 const userRule = Joi.object().keys({ ...loginObj, ...userTextsObj, ...avatarObj });
