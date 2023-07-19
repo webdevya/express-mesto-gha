@@ -18,6 +18,14 @@ const viewModelUser = (data) => {
   };
   return res;
 };
+const getUserById = (id, res, next) => {
+  User.findById(id)
+    .then((data) => {
+      if (data === null) next(new NotFoundError(notFoundText));
+      res.send(viewModelUser(data));
+    })
+    .catch(next);
+};
 
 module.exports.createUserViewModel = (data) => viewModelUser(data);
 
@@ -43,9 +51,8 @@ module.exports.createUser = (req, res, next) => {
     });
 };
 
-module.exports.updateUser = (req, res, next) => {
-  const { name, about } = req.body;
-  User.findByIdAndUpdate(req.user._id, { name, about }, { new: true, runValidators: true })
+const updateUserData = (req, res, next, forUpdate) => {
+  User.findByIdAndUpdate(req.user._id, forUpdate, { new: true, runValidators: true })
     .then((data) => {
       if (data === null) next(new NotFoundError(notFoundText));
       res.send(viewModelUser(data));
@@ -55,38 +62,24 @@ module.exports.updateUser = (req, res, next) => {
         next(new ValidationError(validationErrorText, err.message));
       } else next(err);
     });
+};
+
+module.exports.updateUser = (req, res, next) => {
+  const { name, about } = req.body;
+  updateUserData(req, res, next, { name, about });
 };
 
 module.exports.updateUserAvatar = (req, res, next) => {
   const { avatar } = req.body;
-  User.findByIdAndUpdate(req.user._id, { avatar }, { new: true, runValidators: true })
-    .then((data) => {
-      if (data === null) next(new NotFoundError(notFoundText));
-      res.send(viewModelUser(data));
-    })
-    .catch((err) => {
-      if (err instanceof mongoose.Error) {
-        next(new ValidationError(validationErrorText, err.message));
-      } else next(err);
-    });
+  updateUserData(req, res, next, { avatar });
 };
 
 module.exports.getCurrentUser = (req, res, next) => {
-  User.findById(req.user._id)
-    .then((data) => {
-      if (data === null) next(new NotFoundError(notFoundText));
-      res.send(viewModelUser(data));
-    })
-    .catch(next);
+  getUserById(req.user._id, res, next);
 };
 
 module.exports.getUser = (req, res, next) => {
-  User.findById(req.params.userId)
-    .then((data) => {
-      if (data === null) next(new NotFoundError(notFoundText));
-      res.send(viewModelUser(data));
-    })
-    .catch(next);
+  getUserById(req.params.userId, res, next);
 };
 
 module.exports.getAllUsers = (req, res, next) => {
