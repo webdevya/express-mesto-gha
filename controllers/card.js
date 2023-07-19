@@ -71,9 +71,9 @@ const setLike = (req, res, next, optionObj) => {
 };
 
 module.exports.likeCard = (req, res, next) => {
-  setLike(req, res, next, { $pull: { likes: req.user._id } });
+  setLike(req, res, next, { $addToSet: { likes: req.user._id } });
 };
 
 module.exports.dislikeCard = (req, res, next) => {
-  setLike(req, res, next, { $addToSet: { likes: req.user._id } });
+  setLike(req, res, next, { $pull: { likes: req.user._id } });
 };
