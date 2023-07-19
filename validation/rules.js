@@ -1,5 +1,5 @@
 const { Joi } = require('celebrate');
-const { urlRegex } = require('./regex');
+const { urlRegex, jwtRegex } = require('./regex');
 
 const stringRule = Joi.string().min(2).max(30);
 const stringRuleRequired = Joi.string().required().min(2).max(30);
@@ -17,8 +17,8 @@ const loginObj = { email: emailRule, password: pwdRule };
 const cardObj = { name: stringRule, link: urlRule };
 
 const authRule = Joi.object().keys({
-  authorization: Joi.string().replace('Bearer ', '').token(),
-});
+  authorization: Joi.string().replace('Bearer ', '').pattern(jwtRegex),
+}).unknown();
 
 const userRule = Joi.object().keys({ ...loginObj, ...userTextsObj, ...avatarObj });
 
