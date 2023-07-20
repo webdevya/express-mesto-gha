@@ -4,6 +4,7 @@ const NotFoundError = require('../errors/NotFoundError');
 const ValidationError = require('../errors/ValidationError');
 const Card = require('../models/card');
 const { createUserViewModel } = require('./user');
+const { dataHandler } = require('../utils/dataHandler');
 
 const notFoundText = 'Карточка не найдена';
 const validationErrorText = 'Ошибка вносимых данных для карточки';
@@ -25,6 +26,8 @@ const viewModelCardArray = (data) => {
   return res;
 };
 
+const cardDataHandler = dataHandler(viewModelCard, notFoundText);
+
 module.exports.createCard = (req, res, next) => {
   const { name, link } = req.body;
   Card.create({ name, link, owner: req.user._id }).then((data) => {
@@ -39,19 +42,15 @@ module.exports.createCard = (req, res, next) => {
 
 module.exports.deleteCard = (req, res, next) => {
   Card.findById(req.params.cardId).then((crd) => {
-    if (!crd) next(new NotFoundError(notFoundText));
-    else if (!crd.owner._id.equals(req.user._id)) next(new ForbiddenError());
-    else {
-      crd.deleteOne();
-      res.send(crd);
-    }
-  })
+    if (!crd) throw (new NotFoundError(notFoundText));
+    if (!crd.owner._id.equals(req.user._id)) throw (new ForbiddenError());
+    return crd.deleteOne();
+  }).then((del) => res.send(del))
     .catch(next);
 };
 
 module.exports.getAllCards = (req, res, next) => {
   Card.find({}).populate('owner').then((data) => {
-    if (data === null) next(new NotFoundError(notFoundText));
     res.send(viewModelCardArray(data));
   })
     .catch((err) => {
@@ -67,8 +66,9 @@ const setLike = (req, res, next, optionObj) => {
     optionObj,
     { new: true },
   ).then((data) => {
-    if (data === null) next(new NotFoundError(notFoundText));
-    res.send(viewModelCard(data));
+    cardDataHandler(res, data);
+    // if (data === null) throw (new NotFoundError(notFoundText));
+    // res.send(viewModelCard(data));
   })
     .catch((err) => next(err));
 };

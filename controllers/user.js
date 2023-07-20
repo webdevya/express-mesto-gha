@@ -2,9 +2,10 @@ const mongoose = require('mongoose');
 const jwt = require('jsonwebtoken');
 const bcrypt = require('bcryptjs');
 const User = require('../models/user');
-const NotFoundError = require('../errors/NotFoundError');
+// const NotFoundError = require('../errors/NotFoundError');
 const ValidationError = require('../errors/ValidationError');
 const ConflictError = require('../errors/ConflictError');
+const { dataHandler } = require('../utils/dataHandler');
 
 const { JWT_SECRET } = require('../config');
 
@@ -18,20 +19,24 @@ const viewModelUser = (data) => {
   };
   return res;
 };
-const getUserById = (id, res, next) => {
-  User.findById(id)
-    .then((data) => {
-      if (data === null) next(new NotFoundError(notFoundText));
-      res.send(viewModelUser(data));
-    })
-    .catch(next);
-};
+
+const userDataHandler = dataHandler(viewModelUser, notFoundText);
 
 module.exports.createUserViewModel = (data) => viewModelUser(data);
 
 const ViewModelUserArray = (data) => {
   const res = data.map((user) => viewModelUser(user));
   return res;
+};
+
+const getUserById = (id, res, next) => {
+  User.findById(id)
+    .then((data) => {
+      userDataHandler(res, data);
+      // if (data === null) throw (new NotFoundError(notFoundText));
+      // res.send(viewModelUser(data));
+    })
+    .catch(next);
 };
 
 module.exports.createUser = (req, res, next) => {
@@ -54,8 +59,9 @@ module.exports.createUser = (req, res, next) => {
 const updateUserData = (req, res, next, forUpdate) => {
   User.findByIdAndUpdate(req.user._id, forUpdate, { new: true, runValidators: true })
     .then((data) => {
-      if (data === null) next(new NotFoundError(notFoundText));
-      res.send(viewModelUser(data));
+      userDataHandler(res, data);
+      // if (data === null) throw (new NotFoundError(notFoundText));
+      // res.send(viewModelUser(data));
     })
     .catch((err) => {
       if (err instanceof mongoose.Error) {
@@ -90,7 +96,6 @@ module.exports.getAllUsers = (req, res, next) => {
 
 module.exports.login = (req, res, next) => {
   const { email, password } = req.body;
-  if (!JWT_SECRET) throw new Error('JWT_SECRET not found in environment');
   User.findUserByCredentials(email, password)
     .then((user) => {
       const token = jwt.sign({ _id: user._id }, JWT_SECRET, { expiresIn: '7d' });
